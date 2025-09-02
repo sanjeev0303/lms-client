@@ -32,7 +32,9 @@ export const PerformanceOptimizer: React.FC<PerformanceOptimizerProps> = ({ chil
         // Try hydrate from preloader cache first to avoid extra network
         const preloaded = getPreloadedData('published-courses');
         if (preloaded && !queryClient.getQueryData(QUERY_KEYS.PUBLISHED_COURSES)) {
-          const list = preloaded?.data ?? preloaded;
+          const list = (preloaded && typeof preloaded === 'object' && 'data' in preloaded) 
+            ? preloaded.data 
+            : preloaded;
           queryClient.setQueryData(QUERY_KEYS.PUBLISHED_COURSES, list);
         }
 
