@@ -43,8 +43,9 @@ export function ServerStatus({ showWhenHealthy = false, className = '' }: Server
         // Initial check
         performHealthCheck();
 
-        // More frequent checks every 30 seconds for faster detection
-        const id = setInterval(performHealthCheck, 30000);
+        // Much less frequent checks: 10 minutes for background monitoring
+        // Only check in background, not aggressively
+        const id = setInterval(performHealthCheck, 10 * 60 * 1000); // 10 minutes
 
         return () => {
             mounted = false;
