@@ -3,7 +3,7 @@
  * Centralized HTTP client with proper error handling, retry logic, and type safety
  */
 
-import { API_BASE_URL, REQUEST_TIMEOUT, CACHE_CONFIG } from '@/lib/constants/api';
+import { API_BASE_URL, REQUEST_TIMEOUT } from '@/lib/constants/api';
 import type { ApiResponse } from '@/types/api';
 import { logger } from '@/lib/utils/logger';
 
@@ -25,9 +25,9 @@ function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
 export class ApiClientError extends Error {
     public statusCode: number;
     public response?: Response;
-    public data?: any;
+    public data?: unknown;
 
-    constructor(message: string, statusCode: number, response?: Response, data?: any) {
+    constructor(message: string, statusCode: number, response?: Response, data?: unknown) {
         super(message);
         this.name = 'ApiClientError';
         this.statusCode = statusCode;
@@ -194,7 +194,7 @@ export class ApiClient {
                 });
 
                 // Handle different response types
-                let data: any;
+                let data: unknown;
                 const contentType = response.headers.get('content-type');
 
                 if (contentType?.includes('application/json')) {
@@ -206,8 +206,12 @@ export class ApiClient {
                 }
 
                 if (!response.ok) {
+                    const errorMessage = (data && typeof data === 'object' && 'message' in data && typeof data.message === 'string') 
+                        ? data.message 
+                        : `HTTP error! status: ${response.status}`;
+                    
                     throw new ApiClientError(
-                        data?.message || `HTTP error! status: ${response.status}`,
+                        errorMessage,
                         response.status,
                         response,
                         data
@@ -241,7 +245,7 @@ export class ApiClient {
                             headers: requestHeaders,
                         });
 
-                        let fallbackData: any;
+                        let fallbackData: unknown;
                         const fallbackContentType = fallbackResponse.headers.get('content-type');
 
                         if (fallbackContentType?.includes('application/json')) {
@@ -253,8 +257,12 @@ export class ApiClient {
                         }
 
                         if (!fallbackResponse.ok) {
+                            const fallbackErrorMessage = (fallbackData && typeof fallbackData === 'object' && 'message' in fallbackData && typeof fallbackData.message === 'string') 
+                                ? fallbackData.message 
+                                : `HTTP error! status: ${fallbackResponse.status}`;
+                            
                             throw new ApiClientError(
-                                fallbackData?.message || `HTTP error! status: ${fallbackResponse.status}`,
+                                fallbackErrorMessage,
                                 fallbackResponse.status,
                                 fallbackResponse,
                                 fallbackData
@@ -271,7 +279,7 @@ export class ApiClient {
                             success: true,
                             data: fallbackData as T,
                         };
-                    } catch (fallbackError) {
+                    } catch {
                         // If fallback also fails, throw original error
                         console.error('❌ Both proxy and direct access failed');
                     }
@@ -303,7 +311,7 @@ export class ApiClient {
      */
     async post<T>(
         endpoint: string,
-        data?: any,
+        data?: unknown,
         config?: RequestConfig
     ): Promise<ApiResponse<T>> {
         return this.request<T>(endpoint, {
@@ -321,7 +329,7 @@ export class ApiClient {
      */
     async put<T>(
         endpoint: string,
-        data?: any,
+        data?: unknown,
         config?: RequestConfig
     ): Promise<ApiResponse<T>> {
         return this.request<T>(endpoint, {
@@ -349,7 +357,7 @@ export class ApiClient {
      */
     async patch<T>(
         endpoint: string,
-        data?: any,
+        data?: unknown,
         config?: RequestConfig
     ): Promise<ApiResponse<T>> {
         return this.request<T>(endpoint, {
@@ -381,14 +389,14 @@ export const dockerUtils = {
     async testConnectivity(): Promise<{
         direct: boolean;
         proxy: boolean;
-        directResponse?: any;
-        proxyResponse?: any;
+        directResponse?: unknown;
+        proxyResponse?: unknown;
     }> {
         const results = {
             direct: false,
             proxy: false,
-            directResponse: undefined as any,
-            proxyResponse: undefined as any,
+            directResponse: undefined as unknown,
+            proxyResponse: undefined as unknown,
         };
 
         // Test direct API access

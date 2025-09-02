@@ -8,7 +8,7 @@ import { API_BASE_URL, REQUEST_TIMEOUT } from '@/lib/constants/api';
 interface FastRequestConfig {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   timeout?: number;
   token?: string;
 }
@@ -46,7 +46,7 @@ class FastApiClient {
     }
   }
 
-  async request<T = any>(
+  async request<T = unknown>(
     endpoint: string,
     config: FastRequestConfig = {}
   ): Promise<T> {
@@ -109,12 +109,12 @@ class FastApiClient {
   }
 
   // Optimized POST request
-  async post<T = any>(endpoint: string, body?: any, config: Omit<FastRequestConfig, 'method' | 'body'> = {}): Promise<T> {
+  async post<T = unknown>(endpoint: string, body?: unknown, config: Omit<FastRequestConfig, 'method' | 'body'> = {}): Promise<T> {
     return this.request<T>(endpoint, { ...config, method: 'POST', body });
   }
 
   // Optimized PUT request
-  async put<T = any>(endpoint: string, body?: any, config: Omit<FastRequestConfig, 'method' | 'body'> = {}): Promise<T> {
+  async put<T = unknown>(endpoint: string, body?: unknown, config: Omit<FastRequestConfig, 'method' | 'body'> = {}): Promise<T> {
     return this.request<T>(endpoint, { ...config, method: 'PUT', body });
   }
 
@@ -124,7 +124,7 @@ class FastApiClient {
   }
 
   // Optimized PATCH request
-  async patch<T = any>(endpoint: string, body?: any, config: Omit<FastRequestConfig, 'method' | 'body'> = {}): Promise<T> {
+  async patch<T = unknown>(endpoint: string, body?: unknown, config: Omit<FastRequestConfig, 'method' | 'body'> = {}): Promise<T> {
     return this.request<T>(endpoint, { ...config, method: 'PATCH', body });
   }
 

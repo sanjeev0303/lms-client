@@ -86,7 +86,7 @@ export async function quickHealthCheck(): Promise<boolean> {
 
 // Export for easy access in browser console
 if (typeof window !== 'undefined') {
-    (window as any).dockerTest = {
+    (window as unknown as Record<string, unknown>).dockerTest = {
         testConnectivity: testDockerConnectivity,
         switchMode: switchApiMode,
         healthCheck: quickHealthCheck,
