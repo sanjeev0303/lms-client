@@ -5,23 +5,18 @@
  */
 
 interface AnalyticsEvent {
-  type: 'progress_update' | 'course_view' | 'lecture_complete' | 'engagement';
+  type: string;
+  userId?: string;
   courseId?: string;
   lectureId?: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   timestamp: number;
-}
-
-interface BatchedRequest {
-  events: AnalyticsEvent[];
-  resolvers: Array<(result: any) => void>;
-  rejecters: Array<(error: any) => void>;
 }
 
 class AnalyticsBatcher {
   private queue: AnalyticsEvent[] = [];
-  private resolvers: Array<(result: any) => void> = [];
-  private rejecters: Array<(error: any) => void> = [];
+  private resolvers: Array<(result: void) => void> = [];
+  private rejecters: Array<(error: unknown) => void> = [];
   private batchTimeout: NodeJS.Timeout | null = null;
   private readonly batchSize = 10; // Max events per batch
   private readonly batchDelay = 5000; // 5 seconds max wait
@@ -103,7 +98,7 @@ class AnalyticsBatcher {
       ]);
 
       // Resolve all promises
-      resolvers.forEach(resolve => resolve(results));
+      resolvers.forEach(resolve => resolve());
 
     } catch (error) {
       console.error('Analytics batch processing failed:', error);
@@ -128,7 +123,7 @@ class AnalyticsBatcher {
   /**
    * Process batched progress updates
    */
-  private async processProgressUpdates(events: AnalyticsEvent[]): Promise<any> {
+  private async processProgressUpdates(events: AnalyticsEvent[]): Promise<void> {
     if (events.length === 0) return;
 
     // Group by lecture for bulk updates
@@ -143,23 +138,26 @@ class AnalyticsBatcher {
       }
       groups[key].updates.push(event.data);
       return groups;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, { courseId: string; lectureId: string; updates: unknown[] }>);
 
     // Send batched progress updates
-    const updatePromises = Object.values(progressByLecture).map(async (batch: any) => {
+    const updatePromises = Object.values(progressByLecture).map(async (batch) => {
       // Merge updates (latest values win)
-      const mergedUpdate = batch.updates.reduce((merged: any, update: any) => ({
+      const mergedUpdate = batch.updates.reduce((merged: Record<string, unknown>, update: unknown) => ({
         ...merged,
-        ...update,
+        ...(typeof update === 'object' && update !== null ? update : {}),
         // Keep the latest timestamp
-        lastUpdated: Math.max(merged.lastUpdated || 0, update.lastUpdated || Date.now())
-      }), {});
+        lastUpdated: Math.max(
+          (merged.lastUpdated as number) || 0, 
+          (typeof update === 'object' && update !== null && 'lastUpdated' in update ? (update.lastUpdated as number) : 0) || Date.now()
+        )
+      }), {} as Record<string, unknown>);
 
       // Send single consolidated update per lecture
       return this.sendProgressUpdate(batch.lectureId, mergedUpdate);
     });
 
-    return Promise.allSettled(updatePromises);
+    await Promise.allSettled(updatePromises);
   }
 
   /**
@@ -213,7 +211,7 @@ class AnalyticsBatcher {
     const engagement = {
       totalEvents: events.length,
       eventTypes: events.reduce((types, event) => {
-        const eventType = event.data.eventType || 'unknown';
+        const eventType = (event.data.eventType as string) || 'unknown';
         types[eventType] = (types[eventType] || 0) + 1;
         return types;
       }, {} as Record<string, number>),
@@ -229,7 +227,7 @@ class AnalyticsBatcher {
   /**
    * Send individual progress update
    */
-  private async sendProgressUpdate(lectureId: string, data: any): Promise<any> {
+  private async sendProgressUpdate(lectureId: string, data: unknown): Promise<void> {
     // This would integrate with your actual progress service
     // For now, just log the reduced API call
     console.log(`[BATCHED] Progress update for lecture ${lectureId}:`, data);
@@ -241,7 +239,7 @@ class AnalyticsBatcher {
   /**
    * Send lecture completion
    */
-  private async sendLectureCompletion(lectureId: string, courseId: string, data: any): Promise<any> {
+  private async sendLectureCompletion(lectureId: string, courseId: string, _data: unknown): Promise<void> {
     console.log(`[BATCHED] Lecture completion: ${lectureId} in course ${courseId}`);
 
     // In a real implementation:
@@ -251,7 +249,7 @@ class AnalyticsBatcher {
   /**
    * Send batched analytics data
    */
-  private async sendBatchedAnalytics(type: string, data: any): Promise<any> {
+  private async sendBatchedAnalytics(type: string, data: unknown): Promise<void> {
     console.log(`[BATCHED] Analytics batch (${type}):`, data);
 
     // In a real implementation, this would send to your analytics endpoint

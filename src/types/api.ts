@@ -4,7 +4,7 @@
  */
 
 // Base API Response structure
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
     success: boolean;
     data: T;
     message?: string;
@@ -16,7 +16,7 @@ export interface ApiError {
     message: string;
     statusCode: number;
     error?: string;
-    details?: any;
+    details?: unknown;
 }
 
 // User related types
@@ -68,7 +68,7 @@ export interface Course {
         enrollments: number;
         orders?: number;
     };
-    orders?: any[]; // Additional property for compatibility
+    orders?: unknown[]; // Additional property for compatibility
     revenue?: number; // Additional property for compatibility
     reviews?: unknown[]; // Additional property for compatibility
     createdAt: string;

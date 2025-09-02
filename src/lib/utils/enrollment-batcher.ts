@@ -9,7 +9,7 @@ import { courseService } from '@/lib/api/services';
 interface EnrollmentCheck {
   courseId: string;
   resolver: (isEnrolled: boolean) => void;
-  rejecter: (error: any) => void;
+  rejecter: (error: unknown) => void;
 }
 
 class EnrollmentStatusBatcher {
@@ -100,7 +100,7 @@ class EnrollmentStatusBatcher {
       const enrollmentResults = await this.batchCheckEnrollments(courseIds, token);
 
       // Resolve all checks
-      checks.forEach((check, index) => {
+      checks.forEach((check) => {
         const isEnrolled = enrollmentResults[check.courseId] || false;
         check.resolver(isEnrolled);
       });

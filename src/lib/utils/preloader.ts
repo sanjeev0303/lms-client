@@ -3,23 +3,23 @@
  * Preloads critical data in the background to improve perceived performance
  */
 
-import { QUERY_KEYS, CACHE_CONFIG, API_ENDPOINTS, REQUEST_TIMEOUT } from '@/lib/constants/api';
+import { CACHE_CONFIG, API_ENDPOINTS, REQUEST_TIMEOUT } from '@/lib/constants/api';
 import { fastApiClient } from '@/lib/api/fast-client';
 
 // Simple in-memory cache for preloaded data
-const preloadCache = new Map<string, { data: any; timestamp: number }>();
+const preloadCache = new Map<string, { data: unknown; timestamp: number }>();
 
 /**
  * Cache data with timestamp
  */
-function setCacheData(key: string, data: any): void {
+function setCacheData(key: string, data: unknown): void {
     preloadCache.set(key, { data, timestamp: Date.now() });
 }
 
 /**
  * Get cached data if it's still fresh
  */
-function getCacheData(key: string, maxAge: number = CACHE_CONFIG.STALE_TIME.SHORT): any | null {
+function getCacheData(key: string, maxAge: number = CACHE_CONFIG.STALE_TIME.SHORT): unknown | null {
     const cached = preloadCache.get(key);
     if (cached && Date.now() - cached.timestamp < maxAge) {
         return cached.data;
@@ -83,7 +83,7 @@ export async function preloadUserProfile(token?: string): Promise<void> {
 /**
  * Get preloaded data
  */
-export function getPreloadedData(key: string): any | null {
+export function getPreloadedData(key: string): unknown | null {
     return getCacheData(key);
 }
 

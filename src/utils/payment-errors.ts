@@ -35,7 +35,7 @@ export const checkBrowserCompatibility = (): string[] => {
                     issues.push('Network requests being blocked - disable ad blockers');
                 }
             });
-        } catch (e) {
+        } catch {
             // Fetch not available or blocked
         }
     }
@@ -56,7 +56,7 @@ export const checkBrowserCompatibility = (): string[] => {
         try {
             localStorage.setItem('test', 'test');
             localStorage.removeItem('test');
-        } catch (e) {
+        } catch {
             issues.push('Third-party storage blocked - please allow cookies for payments');
         }
     }
@@ -64,7 +64,7 @@ export const checkBrowserCompatibility = (): string[] => {
     return issues;
 };
 
-export const handlePaymentErrors = (error: any) => {
+export const handlePaymentErrors = (error: unknown) => {
     console.error('Payment error:', error);
 
     // Common error messages
@@ -87,8 +87,9 @@ export const handlePaymentErrors = (error: any) => {
     // Determine error type
     let errorType = 'PROCESSING_ERROR';
 
-    if (error?.code) {
-        switch (error.code) {
+    if (error && typeof error === 'object' && 'code' in error) {
+        const errorCode = error.code as string;
+        switch (errorCode) {
             case 'NETWORK_ERROR':
             case 'ERR_NETWORK':
             case 'ERR_BLOCKED_BY_CLIENT':
@@ -98,19 +99,20 @@ export const handlePaymentErrors = (error: any) => {
                 errorType = 'GATEWAY_ERROR';
                 break;
             case 'BAD_REQUEST_ERROR':
-                if (error.description?.includes('key')) {
+                if ('description' in error && typeof error.description === 'string' && error.description.includes('key')) {
                     errorType = 'INVALID_KEY';
                 }
                 break;
             default:
                 errorType = 'PROCESSING_ERROR';
         }
-    } else if (error?.message) {
-        if (error.message.includes('script') || error.message.includes('load')) {
+    } else if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+        const errorMessage = error.message;
+        if (errorMessage.includes('script') || errorMessage.includes('load')) {
             errorType = 'SCRIPT_LOAD_ERROR';
-        } else if (error.message.includes('network') || error.message.includes('fetch') || error.message.includes('blocked')) {
+        } else if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('blocked')) {
             errorType = 'BLOCKED_BY_CLIENT';
-        } else if (error.message.includes('cancelled')) {
+        } else if (errorMessage.includes('cancelled')) {
             errorType = 'USER_CANCELLED';
         }
     }
