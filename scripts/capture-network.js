@@ -22,24 +22,24 @@ class NetworkCapture {
             devtools: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
-        
+
         this.page = await this.browser.newPage();
-        
+
         // Enable request interception
         await this.page.setRequestInterception(true);
-        
+
         // Track all network requests
         this.page.on('request', (request) => {
             const url = request.url();
-            
+
             // Only track API calls to our backend
-            if (url.includes('localhost:5000') || 
-                url.includes('/api/') || 
+            if (url.includes('localhost:5000') ||
+                url.includes('/api/') ||
                 url.includes('/course/') ||
                 url.includes('/lecture/') ||
                 url.includes('/order/') ||
                 url.includes('/health')) {
-                
+
                 this.requests.push({
                     timestamp: Date.now() - this.startTime,
                     method: request.method(),
@@ -49,24 +49,24 @@ class NetworkCapture {
                     resourceType: request.resourceType(),
                     fromCache: request.fromCache ? request.fromCache() : false
                 });
-                
+
                 console.log(`📤 ${request.method()} ${url}`);
             }
-            
+
             request.continue();
         });
-        
+
         // Track responses
         this.page.on('response', (response) => {
             const url = response.url();
-            
-            if (url.includes('localhost:5000') || 
-                url.includes('/api/') || 
+
+            if (url.includes('localhost:5000') ||
+                url.includes('/api/') ||
                 url.includes('/course/') ||
                 url.includes('/lecture/') ||
                 url.includes('/order/') ||
                 url.includes('/health')) {
-                
+
                 this.responses.push({
                     timestamp: Date.now() - this.startTime,
                     method: response.request().method(),
@@ -77,11 +77,11 @@ class NetworkCapture {
                     fromCache: response.fromCache(),
                     timing: response.timing()
                 });
-                
+
                 console.log(`📥 ${response.status()} ${url} (${response.headers()['content-length'] || '?'} bytes)`);
             }
         });
-        
+
         // Set viewport
         await this.page.setViewport({ width: 1280, height: 720 });
     }
@@ -92,7 +92,7 @@ class NetworkCapture {
 
     async simulateTypicalUserSession() {
         console.log('🎬 Starting typical user session simulation...');
-        
+
         try {
             // 1. Visit home page
             console.log('\n📍 Step 1: Visit home page');
@@ -138,7 +138,7 @@ class NetworkCapture {
             // 5. Check enrollment/start learning
             console.log('\n📍 Step 5: Check enrollment status');
             await this.wait(2000);
-            
+
             try {
                 // Look for enrollment button or learning button
                 const enrollBtn = await this.page.$('button:contains("Enroll"), button:contains("Start Learning")');
@@ -191,7 +191,7 @@ class NetworkCapture {
     generateReport() {
         const totalRequests = this.requests.length;
         const totalResponses = this.responses.length;
-        
+
         // Group by endpoint
         const endpointStats = {};
         this.requests.forEach(req => {
@@ -254,10 +254,10 @@ class NetworkCapture {
 
     async saveResults() {
         const report = this.generateReport();
-        
+
         const outputPath = path.join(__dirname, '../diagnostics/network-log-before.json');
         fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
-        
+
         console.log('\n📊 BASELINE MEASUREMENT RESULTS:');
         console.log(`📁 Saved to: ${outputPath}`);
         console.log(`🔢 Total API calls: ${report.summary.totalRequests}`);
@@ -267,7 +267,7 @@ class NetworkCapture {
         report.topEndpoints.forEach((ep, i) => {
             console.log(`  ${i + 1}. ${ep.endpoint} (${ep.count} calls)`);
         });
-        
+
         console.log('\n💰 Cost analysis:');
         console.log(`  Health checks: ${report.costAnalysis.healthChecks}`);
         console.log(`  User data calls: ${report.costAnalysis.userDataCalls}`);
@@ -282,7 +282,7 @@ class NetworkCapture {
             topEndpoints: report.topEndpoints,
             costAnalysis: report.costAnalysis
         }, null, 2));
-        
+
         console.log(`📊 Top endpoints saved to: ${topEndpointsPath}`);
     }
 
@@ -296,7 +296,7 @@ class NetworkCapture {
 // Main execution
 async function main() {
     const capture = new NetworkCapture();
-    
+
     try {
         await capture.init();
         await capture.simulateTypicalUserSession();

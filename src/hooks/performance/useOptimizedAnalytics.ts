@@ -8,30 +8,30 @@ import { useAuth } from '@clerk/nextjs';
 import analyticsBatcher, { type AnalyticsEvent } from '@/lib/utils/analytics-batcher';
 
 interface UseOptimizedAnalyticsReturn {
-  trackProgress: (courseId: string, lectureId: string, data: { 
-    watchedDuration?: number; 
+  trackProgress: (courseId: string, lectureId: string, data: {
+    watchedDuration?: number;
     isCompleted?: boolean;
     lastUpdated?: number;
   }) => Promise<void>;
-  
-  trackCourseView: (courseId: string, data: { 
-    duration?: number; 
+
+  trackCourseView: (courseId: string, data: {
+    duration?: number;
     source?: string;
     userId?: string;
   }) => Promise<void>;
-  
+
   trackLectureCompletion: (courseId: string, lectureId: string, data: {
     completionTime?: number;
     totalDuration?: number;
   }) => Promise<void>;
-  
+
   trackEngagement: (data: {
     eventType: string;
     courseId?: string;
     lectureId?: string;
     metadata?: Record<string, any>;
   }) => Promise<void>;
-  
+
   flushAnalytics: () => Promise<void>;
 }
 
@@ -48,8 +48,8 @@ export const useOptimizedAnalytics = (): UseOptimizedAnalyticsReturn => {
    * CRITICAL: Always sent (no sampling)
    */
   const trackProgress = useCallback(async (
-    courseId: string, 
-    lectureId: string, 
+    courseId: string,
+    lectureId: string,
     data: { watchedDuration?: number; isCompleted?: boolean; lastUpdated?: number }
   ) => {
     await analyticsBatcher.addEvent({
@@ -69,7 +69,7 @@ export const useOptimizedAnalytics = (): UseOptimizedAnalyticsReturn => {
    * SAMPLED: 70% of events sent to reduce API load
    */
   const trackCourseView = useCallback(async (
-    courseId: string, 
+    courseId: string,
     data: { duration?: number; source?: string; userId?: string }
   ) => {
     await analyticsBatcher.addEvent({

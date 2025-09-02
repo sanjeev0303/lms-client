@@ -93,7 +93,7 @@ class AnalyticsBatcher {
     try {
       // Group events by type for optimized processing
       const groupedEvents = this.groupEventsByType(events);
-      
+
       // Process each group
       const results = await Promise.allSettled([
         this.processProgressUpdates(groupedEvents.progress_update || []),
@@ -196,7 +196,7 @@ class AnalyticsBatcher {
     if (events.length === 0) return;
 
     // These are critical - process each one
-    const completionPromises = events.map(event => 
+    const completionPromises = events.map(event =>
       this.sendLectureCompletion(event.lectureId!, event.courseId!, event.data)
     );
 
@@ -233,7 +233,7 @@ class AnalyticsBatcher {
     // This would integrate with your actual progress service
     // For now, just log the reduced API call
     console.log(`[BATCHED] Progress update for lecture ${lectureId}:`, data);
-    
+
     // In a real implementation, this would call progressService.updateLectureProgress
     // return progressService.updateLectureProgress(lectureId, data);
   }
@@ -243,7 +243,7 @@ class AnalyticsBatcher {
    */
   private async sendLectureCompletion(lectureId: string, courseId: string, data: any): Promise<any> {
     console.log(`[BATCHED] Lecture completion: ${lectureId} in course ${courseId}`);
-    
+
     // In a real implementation:
     // return progressService.completeLecture(lectureId, courseId);
   }
@@ -253,7 +253,7 @@ class AnalyticsBatcher {
    */
   private async sendBatchedAnalytics(type: string, data: any): Promise<any> {
     console.log(`[BATCHED] Analytics batch (${type}):`, data);
-    
+
     // In a real implementation, this would send to your analytics endpoint
     // return analyticsService.sendBatch(type, data);
   }

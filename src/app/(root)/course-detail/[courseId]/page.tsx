@@ -148,7 +148,7 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
   // Helper function to check if a lecture is completed
   const isLectureCompleted = (lectureId: string): boolean => {
     const lectureProgressList = lectureProgressData?.lectures ?? [];
-    const progressRecord = lectureProgressList.find((p) => p.lectureId === lectureId);
+    const progressRecord = lectureProgressList.find((p: { lectureId: string; isCompleted?: boolean }) => p.lectureId === lectureId);
     return !!progressRecord?.isCompleted;
   };
 

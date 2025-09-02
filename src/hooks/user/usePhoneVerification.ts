@@ -21,7 +21,7 @@ export const useVerifyPhone = () => {
       const response = await userService.verifyPhone({ phoneNumber }, token || undefined);
       return response.data;
     },
-    onSuccess: (result) => {
+    onSuccess: (result: { success: boolean; message: string }) => {
       if (result.success) {
         toast.success('Phone verification initiated. Please check your SMS.');
       } else {

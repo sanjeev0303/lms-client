@@ -85,7 +85,7 @@ const ProfilePage = () => {
         }
         setSelectedFile(null);
       },
-      onError: (error) => {
+      onError: (error: Error) => {
         setError(error instanceof Error ? error.message : "Failed to update profile");
       },
     });

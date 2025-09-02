@@ -25,13 +25,13 @@ class EnrollmentStatusBatcher {
   async checkEnrollmentStatus(courseId: string, token?: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const batchKey = token || 'anonymous';
-      
+
       if (!this.pendingChecks.has(batchKey)) {
         this.pendingChecks.set(batchKey, []);
       }
 
       const checks = this.pendingChecks.get(batchKey)!;
-      
+
       // Check if we already have a pending check for this course
       const existingCheck = checks.find(check => check.courseId === courseId);
       if (existingCheck) {
@@ -121,15 +121,15 @@ class EnrollmentStatusBatcher {
   private async batchCheckEnrollments(courseIds: string[], token?: string): Promise<Record<string, boolean>> {
     // SIMULATION: This would be replaced with actual batch API call
     // For now, we simulate by making fewer individual calls with caching
-    
+
     const results: Record<string, boolean> = {};
-    
+
     // Group by unique courses to avoid duplicates
     const uniqueCourseIds = [...new Set(courseIds)];
-    
+
     // Simulated batch call - in reality this would be:
     // const response = await courseService.batchCheckEnrollments(uniqueCourseIds, token);
-    
+
     // For now, make individual calls but log the optimization
     const enrollmentPromises = uniqueCourseIds.slice(0, 5).map(async (courseId) => {
       try {
@@ -142,7 +142,7 @@ class EnrollmentStatusBatcher {
     });
 
     const enrollmentData = await Promise.allSettled(enrollmentPromises);
-    
+
     // Process results
     enrollmentData.forEach((result, index) => {
       if (result.status === 'fulfilled') {
@@ -169,7 +169,7 @@ class EnrollmentStatusBatcher {
    */
   public async flush(): Promise<void> {
     this.processPendingBatches();
-    
+
     // Wait for any pending operations
     await new Promise(resolve => setTimeout(resolve, 100));
   }

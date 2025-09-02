@@ -98,7 +98,7 @@ export class OptimizedApiClient {
      * Deduplicated GET request
      */
     async get<T>(
-        endpoint: string, 
+        endpoint: string,
         config: { headers?: Record<string, string>; timeout?: number } = {}
     ): Promise<ApiResponse<T>> {
         const url = `${this.baseURL}${endpoint}`;
@@ -113,7 +113,7 @@ export class OptimizedApiClient {
 
         // Create new request
         const requestPromise = this.executeRequest<T>('GET', endpoint, undefined, config);
-        
+
         // Cache the promise
         inFlightRequests.set(cacheKey, requestPromise);
 
@@ -221,11 +221,11 @@ export class OptimizedApiClient {
 
         } catch (error) {
             clearTimeout(timeoutId);
-            
+
             if (error instanceof Error && error.name === 'AbortError') {
                 throw new Error('Request timeout');
             }
-            
+
             throw error;
         }
     }

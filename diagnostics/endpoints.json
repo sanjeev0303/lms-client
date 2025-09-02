@@ -11,7 +11,7 @@
     },
     {
       "path": "/api/me",
-      "method": "GET", 
+      "method": "GET",
       "frequency": "high",
       "pattern": "middleware+hooks",
       "costImpact": "high",
@@ -26,7 +26,7 @@
       "files": ["src/hooks/course/useCourse.ts", "src/hooks/performance/index.ts"]
     },
     {
-      "path": "/course/creator-courses", 
+      "path": "/course/creator-courses",
       "method": "GET",
       "frequency": "medium",
       "pattern": "dashboard",
@@ -43,7 +43,7 @@
     },
     {
       "path": "/lecture/lectures/{courseId}",
-      "method": "GET", 
+      "method": "GET",
       "frequency": "high",
       "pattern": "course-content",
       "costImpact": "high",
@@ -52,7 +52,7 @@
     {
       "path": "/course/{courseId}/enrollment",
       "method": "GET",
-      "frequency": "high", 
+      "frequency": "high",
       "pattern": "course-access",
       "costImpact": "high",
       "files": ["src/hooks/course/useCourse.ts"]
@@ -62,7 +62,7 @@
       "method": "GET",
       "frequency": "medium",
       "pattern": "progress-tracking",
-      "costImpact": "medium", 
+      "costImpact": "medium",
       "files": ["src/hooks/progress/useProgress.ts", "src/hooks/course/useCourseView.ts"]
     },
     {
@@ -82,7 +82,7 @@
       "files": ["src/hooks/payment/usePayment.ts"]
     },
     {
-      "path": "/order/verify-payment", 
+      "path": "/order/verify-payment",
       "method": "POST",
       "frequency": "low",
       "pattern": "payment",
@@ -99,7 +99,7 @@
     },
     {
       "path": "/user/verify-phone",
-      "method": "POST", 
+      "method": "POST",
       "frequency": "low",
       "pattern": "verification",
       "costImpact": "low",
@@ -120,7 +120,7 @@
     "criticalCostEndpoints": 1,
     "optimizationOpportunities": [
       "Consolidate course detail + lectures + enrollment into single call",
-      "Remove or reduce health check polling frequency", 
+      "Remove or reduce health check polling frequency",
       "Add request deduplication for GET calls",
       "Implement search debouncing",
       "Batch enrollment status checks"

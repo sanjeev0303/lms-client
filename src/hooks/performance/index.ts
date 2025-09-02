@@ -36,7 +36,6 @@ export function usePublishedCoursesFast() {
         refetchInterval: false, // REMOVED: No automatic polling
         refetchIntervalInBackground: false, // REMOVED: No background polling
     });
-    });
 }
 
 /**
