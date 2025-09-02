@@ -25,16 +25,17 @@ export function usePublishedCoursesFast() {
                 throw new Error('Fast fetch failed, using cached data');
             }
         },
-        staleTime: CACHE_CONFIG.STALE_TIME.LONG, // 15 minutes
+        staleTime: CACHE_CONFIG.STALE_TIME.VERY_LONG, // 1 hour - much longer stale time
         gcTime: CACHE_CONFIG.GC_TIME.LONG, // 30 minutes
         retry: 1, // Only 1 retry for fast operations
-        retryDelay: 500, // Quick retry
+        retryDelay: 1000, // Slower retry to avoid server pressure
         refetchOnMount: false, // Always use cached data on mount
         refetchOnWindowFocus: false,
         refetchOnReconnect: false, // Don't refetch on reconnect
-        // Enable background refetch but don't show loading state
-        refetchInterval: 5 * 60 * 1000, // Background refetch every 5 minutes
-        refetchIntervalInBackground: true,
+        // REMOVED: Background refetch to reduce API costs
+        refetchInterval: false, // REMOVED: No automatic polling
+        refetchIntervalInBackground: false, // REMOVED: No background polling
+    });
     });
 }
 
@@ -49,31 +50,37 @@ export function useCachedQuery<T>(
     return useQuery({
         queryKey,
         queryFn,
-        staleTime: CACHE_CONFIG.STALE_TIME.LONG,
+        staleTime: CACHE_CONFIG.STALE_TIME.VERY_LONG, // 1 hour - extended stale time
         gcTime: CACHE_CONFIG.GC_TIME.LONG,
         retry: 1,
-        retryDelay: 500,
+        retryDelay: 1000, // Slower retry
         refetchOnMount: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
-        // Show cached data immediately, refetch in background
-        refetchInterval: 10 * 60 * 1000, // 10 minutes
-        refetchIntervalInBackground: true,
+        // REMOVED: Background refetch to reduce API costs
+        refetchInterval: false, // REMOVED: No automatic polling
+        refetchIntervalInBackground: false, // REMOVED: No background polling
         ...options,
     });
 }
 
 /**
  * Hook for fast server health check
+ * OPTIMIZED: Removed aggressive polling to reduce API costs
  */
 export function useServerHealth() {
     return useQuery({
         queryKey: ['serverHealth'],
         queryFn: () => fastApiClient.healthCheck(),
-        staleTime: 30000, // 30 seconds
+        staleTime: 10 * 60 * 1000, // 10 minutes - much longer stale time
         retry: 1,
-        retryDelay: 200,
-        refetchInterval: 30000, // Check every 30 seconds
-        refetchIntervalInBackground: true,
+        retryDelay: 1000,
+        refetchInterval: false, // REMOVED: No automatic polling
+        refetchIntervalInBackground: false, // REMOVED: No background polling
+        refetchOnWindowFocus: false, // REMOVED: No refetch on focus
+        // Health checks should only happen:
+        // 1. On manual user action (explicit refetch)
+        // 2. On component mount
+        // 3. On API error recovery
     });
 }
