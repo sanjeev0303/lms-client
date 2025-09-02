@@ -1,0 +1,129 @@
+{
+  "endpoints": [
+    {
+      "path": "/health",
+      "method": "GET",
+      "frequency": "high",
+      "pattern": "polling",
+      "interval": "30s",
+      "costImpact": "critical",
+      "files": ["src/components/global/server-status.tsx", "src/lib/api/health-check.ts"]
+    },
+    {
+      "path": "/api/me",
+      "method": "GET", 
+      "frequency": "high",
+      "pattern": "middleware+hooks",
+      "costImpact": "high",
+      "files": ["src/middleware.ts", "src/hooks/user/useCurrentUser.ts"]
+    },
+    {
+      "path": "/course/published",
+      "method": "GET",
+      "frequency": "medium",
+      "pattern": "caching",
+      "costImpact": "medium",
+      "files": ["src/hooks/course/useCourse.ts", "src/hooks/performance/index.ts"]
+    },
+    {
+      "path": "/course/creator-courses", 
+      "method": "GET",
+      "frequency": "medium",
+      "pattern": "dashboard",
+      "costImpact": "medium",
+      "files": ["src/hooks/course/useCourse.ts"]
+    },
+    {
+      "path": "/course/{courseId}",
+      "method": "GET",
+      "frequency": "high",
+      "pattern": "detail-page",
+      "costImpact": "high",
+      "files": ["src/hooks/course/useCourse.ts", "src/hooks/course/useCourseView.ts"]
+    },
+    {
+      "path": "/lecture/lectures/{courseId}",
+      "method": "GET", 
+      "frequency": "high",
+      "pattern": "course-content",
+      "costImpact": "high",
+      "files": ["src/hooks/lecture/useLecture.ts", "src/hooks/course/useCourseView.ts"]
+    },
+    {
+      "path": "/course/{courseId}/enrollment",
+      "method": "GET",
+      "frequency": "high", 
+      "pattern": "course-access",
+      "costImpact": "high",
+      "files": ["src/hooks/course/useCourse.ts"]
+    },
+    {
+      "path": "/lecture-progress/course/{courseId}",
+      "method": "GET",
+      "frequency": "medium",
+      "pattern": "progress-tracking",
+      "costImpact": "medium", 
+      "files": ["src/hooks/progress/useProgress.ts", "src/hooks/course/useCourseView.ts"]
+    },
+    {
+      "path": "/lecture-progress/lecture/{lectureId}",
+      "method": "PUT",
+      "frequency": "medium",
+      "pattern": "progress-update",
+      "costImpact": "low",
+      "files": ["src/hooks/progress/useProgress.ts"]
+    },
+    {
+      "path": "/order/create-order",
+      "method": "POST",
+      "frequency": "low",
+      "pattern": "payment",
+      "costImpact": "low",
+      "files": ["src/hooks/payment/usePayment.ts"]
+    },
+    {
+      "path": "/order/verify-payment", 
+      "method": "POST",
+      "frequency": "low",
+      "pattern": "payment",
+      "costImpact": "low",
+      "files": ["src/hooks/payment/usePayment.ts"]
+    },
+    {
+      "path": "/user/profile",
+      "method": "PUT",
+      "frequency": "low",
+      "pattern": "profile-update",
+      "costImpact": "low",
+      "files": ["src/hooks/user/useCurrentUser.ts"]
+    },
+    {
+      "path": "/user/verify-phone",
+      "method": "POST", 
+      "frequency": "low",
+      "pattern": "verification",
+      "costImpact": "low",
+      "files": ["src/hooks/user/usePhoneVerification.ts"]
+    },
+    {
+      "path": "/course/{courseId}/analytics",
+      "method": "GET",
+      "frequency": "low",
+      "pattern": "analytics",
+      "costImpact": "low",
+      "files": ["src/hooks/course/useCourseAnalytics.ts"]
+    }
+  ],
+  "summary": {
+    "totalEndpoints": 14,
+    "highFrequencyEndpoints": 5,
+    "criticalCostEndpoints": 1,
+    "optimizationOpportunities": [
+      "Consolidate course detail + lectures + enrollment into single call",
+      "Remove or reduce health check polling frequency", 
+      "Add request deduplication for GET calls",
+      "Implement search debouncing",
+      "Batch enrollment status checks"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+API CALL SITES ANALYSIS
+======================
+
+HIGH-FREQUENCY API PATTERNS DETECTED:
+
+📍 POLLING & FREQUENT INTERVALS:
+1. HEALTH CHECK POLLING (HIGH COST):
+   - File: src/components/global/server-status.tsx
+   - Pattern: setInterval(performHealthCheck, 30000) - EVERY 30 SECONDS
+   - Cost Impact: 1,440 calls per day per user
+   - Severity: HIGH - Unnecessary for most users
+
+2. MIDDLEWARE ROLE CHECKS (MEDIUM COST):
+   - File: src/middleware.ts  
+   - Pattern: Fetches user role on every protected route navigation
+   - Cache: 15min TTL, good but could be improved
+   - Cost Impact: Multiple calls per session
+   - Severity: MEDIUM - Has caching but still redundant
+
+📍 RAW FETCH CALLS (DUPLICATION RISK):
+1. DIRECT FETCH IN MIDDLEWARE:
+   - File: src/middleware.ts:46
+   - Pattern: fetch(`${API_URL}/api/me`)
+   - Issue: Bypasses React Query cache, duplicates user data calls
+
+2. AD BLOCKER DETECTION:
+   - File: src/utils/payment-errors.ts:29
+   - Pattern: fetch('https://googleads.g.doubleclick.net/pagead/id')
+   - Issue: External API call that could be cached or sampled
+
+3. VIDEO URL VALIDATION:
+   - File: src/app/(root)/course-detail/[courseId]/page.tsx:86
+   - Pattern: fetch(videoUrl, { method: "HEAD" }) for each video
+   - Issue: Per-video HEAD requests without batching
+
+📍 REACT QUERY HOOKS (GOOD PATTERNS):
+✅ WELL-OPTIMIZED:
+- useCourseView: Consolidated multiple API calls into parallel batch
+- Progress tracking: Proper caching strategies
+- User hooks: Appropriate stale times
+
+⚠️ POTENTIAL IMPROVEMENTS:
+- Some queries lack proper deduplication keys
+- Missing debouncing on search/typeahead
+- Enrollment status checks could be batched
+
+📍 API SERVICE PATTERNS:
+DETECTED SERVICES:
+- courseService: Multiple endpoints (create, fetch, update, delete)
+- lectureService: Course content and individual lectures  
+- userService: Profile, verification, current user
+- paymentService: Order creation, verification
+- progressService: Lecture progress tracking
+
+OPTIMIZATION OPPORTUNITIES:
+1. Multiple separate calls for course pages (4-6 requests)
+2. User data fetched in multiple places (middleware + hooks)
+3. No request deduplication for concurrent calls
+4. No batching for related operations
+
+📍 ENDPOINT FREQUENCY ANALYSIS:
+HIGH FREQUENCY:
+- /health (every 30s per user) ❌ EXCESSIVE
+- /api/me (role checks + user data) ⚠️ FREQUENT
+- Course detail + lectures + enrollment (3-4 calls per page) ⚠️ BATCHABLE
+
+MEDIUM FREQUENCY:
+- Progress updates (per lecture interaction)
+- Course listing (dashboard refreshes)
+- Analytics data (instructor dashboard)
+
+LOW FREQUENCY:
+- Authentication flows
+- Payment operations
+- File uploads
+
+📍 COST IMPACT ESTIMATE:
+CURRENT DAILY CALLS PER ACTIVE USER:
+- Health checks: 1,440 calls ❌
+- Role verifications: ~50-100 calls ⚠️  
+- Course browsing: ~200-400 calls ⚠️
+- Progress tracking: ~50-200 calls ✅
+- Other operations: ~100-200 calls ✅
+
+TOTAL: ~1,840-2,140 API calls per active user per day
+
+OPTIMIZATION TARGET: Reduce by 60-70% to ~600-800 calls per day
+
+📍 IMMEDIATE HIGH-IMPACT FIXES:
+1. Health check polling: Remove or increase to 5-10 minutes
+2. Consolidate course page API calls (4-6 → 1 parallel batch)
+3. Add GET request deduplication in apiClient
+4. Implement search debouncing
+5. Add cross-tab token refresh coordination

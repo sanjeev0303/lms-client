@@ -1,0 +1,125 @@
+```mermaid
+graph TD
+    A[User Visits LMS] --> B{Authenticated?}
+    
+    %% Authentication Flow
+    B -->|No| C[Sign In/Sign Up Page]
+    C --> D[Clerk Authentication]
+    D --> E[Verify Email]
+    E --> F[Create User in Database]
+    F --> G[Middleware Role Check]
+    
+    %% API Calls in Auth Flow
+    D -.->|API Call| API1["/api/clerk/webhook"]
+    F -.->|API Call| API2["/api/auth/signup"]
+    G -.->|API Call| API3["/api/me - FREQUENT"]
+    
+    %% Course Browsing Flow
+    B -->|Yes| H[Home Page]
+    G --> H
+    H --> I[Browse Published Courses]
+    I -.->|API Call| API4["/course/published"]
+    
+    %% Course Detail Flow - MULTIPLE API CALLS
+    I --> J[Course Detail Page]
+    J -.->|API Call 1| API5["/course/{courseId}"]
+    J -.->|API Call 2| API6["/lecture/lectures/{courseId}"]
+    J -.->|API Call 3| API7["/course/{courseId}/enrollment"]
+    J -.->|API Call 4| API8["/lecture-progress/course/{courseId}"]
+    
+    %% Health Check Polling - EXPENSIVE
+    H -.->|Every 30s| API9["/health - POLLING"]
+    J -.->|Every 30s| API9
+    
+    %% Enrollment Flow
+    J --> K{Enrolled?}
+    K -->|No| L[Purchase Course]
+    L --> M[Payment Modal]
+    M -.->|API Call| API10["/order/create-order"]
+    M --> N[Razorpay Payment]
+    N -.->|API Call| API11["/order/verify-payment"]
+    N --> O[Enrollment Success]
+    
+    %% Learning Flow
+    K -->|Yes| P[Start Learning]
+    O --> P
+    P --> Q[Course Progress Page]
+    Q -.->|API Call 1| API5
+    Q -.->|API Call 2| API6  
+    Q -.->|API Call 3| API8
+    Q --> R[Select Lecture]
+    R --> S[Lecture Player Page]
+    S -.->|API Call| API12["/lecture/{lectureId}"]
+    
+    %% Progress Tracking
+    S --> T[Watch Lecture]
+    T --> U[Mark Progress]
+    U -.->|API Call| API13["/lecture-progress/lecture/{lectureId}"]
+    U --> V{More Lectures?}
+    V -->|Yes| R
+    V -->|No| W[Course Complete]
+    
+    %% Assessment Flow (Future)
+    W --> X[Assessment Submission]
+    X -.->|API Call| API14["/assessment/submit - FUTURE"]
+    
+    %% Dashboard Flow (Instructor)
+    H --> Y{Is Instructor?}
+    Y -->|Yes| Z[Creator Dashboard]
+    Z -.->|API Call| API15["/course/creator-courses"]
+    Z --> AA[Course Analytics]
+    AA -.->|API Call| API16["/course/{courseId}/analytics"]
+    
+    %% Profile Management
+    H --> BB[User Profile]
+    BB -.->|API Call| API17["/user/profile"]
+    BB --> CC[Phone Verification]
+    CC -.->|API Call| API18["/user/verify-phone"]
+    
+    %% Logout
+    W --> DD[Logout]
+    X --> DD
+    AA --> DD
+    CC --> DD
+    DD --> A
+    
+    %% Style API calls with cost indicators
+    classDef highCost fill:#ff6b6b,stroke:#d63031,stroke-width:3px,color:#fff
+    classDef mediumCost fill:#feca57,stroke:#ff9ff3,stroke-width:2px
+    classDef lowCost fill:#48cae4,stroke:#0077be,stroke-width:1px
+    
+    class API3,API5,API6,API7,API8,API9 highCost
+    class API4,API12,API13,API15,API16 mediumCost  
+    class API1,API2,API10,API11,API14,API17,API18 lowCost
+```
+
+## FLOW ANALYSIS - API COST BREAKDOWN
+
+### CRITICAL COST ISSUES:
+1. **Health Check Polling (API9)**: `/health` called every 30 seconds across all pages
+   - Impact: 1,440 calls/day per active user
+   - Fix: Remove polling or increase to 5-10 minutes
+
+2. **Course Detail Page Multi-Call Pattern**: 4 separate API calls for single page
+   - API5: Course details
+   - API6: Course lectures  
+   - API7: Enrollment status
+   - API8: Progress data
+   - Fix: Consolidate into single parallel batch call
+
+3. **Redundant User Data Fetching (API3)**: `/api/me` called in multiple places
+   - Middleware role checks
+   - User profile hooks
+   - Fix: Better caching coordination
+
+### OPTIMIZATION OPPORTUNITIES:
+- **Batch Operations**: Group related calls (course + lectures + enrollment)
+- **Smart Caching**: Leverage React Query more effectively
+- **Request Deduplication**: Prevent concurrent duplicate calls
+- **Search Debouncing**: Add for typeahead/search features
+- **Cross-tab Coordination**: Single token refresh across tabs
+
+### PERFORMANCE IMPACT:
+- Current: ~1,840-2,140 API calls per active user per day
+- Target: ~600-800 calls per day (60-70% reduction)
+- Primary savings from health check reduction and call consolidation

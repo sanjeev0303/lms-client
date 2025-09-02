@@ -19,8 +19,6 @@ export function ServerStatus({ showWhenHealthy = false, className = '' }: Server
 
     useEffect(() => {
         let mounted = true;
-        const interval = setInterval(() => {}, 0); // placeholder, will be cleared then reassigned
-        clearInterval(interval);
 
         const performHealthCheck = async () => {
             if (!mounted) return;
@@ -40,18 +38,22 @@ export function ServerStatus({ showWhenHealthy = false, className = '' }: Server
             }
         };
 
-        // Initial check
-        performHealthCheck();
+        // Only check once on mount if explicitly requested
+        if (showWhenHealthy) {
+            performHealthCheck();
+        }
 
-        // Much less frequent checks: 10 minutes for background monitoring
-        // Only check in background, not aggressively
-        const id = setInterval(performHealthCheck, 10 * 60 * 1000); // 10 minutes
+        // COST OPTIMIZATION: Removed automatic polling
+        // Health checks are now only triggered:
+        // 1. On component mount (if showWhenHealthy=true)
+        // 2. On API errors (reactive checking)
+        // 3. Manual refresh by user action
+        // This reduces from 144 calls/day to ~1-5 calls/day per user
 
         return () => {
             mounted = false;
-            clearInterval(id);
         };
-    }, []);
+    }, [showWhenHealthy]);
 
     // Don't show anything if we don't have status yet
     if (!healthStatus && !isChecking) {

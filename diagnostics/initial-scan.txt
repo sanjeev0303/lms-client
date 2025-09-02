@@ -1,0 +1,39 @@
+CLIENT INITIAL SCAN
+====================
+
+FRAMEWORK DETECTION:
+- Next.js 15.4.6 (App Router + Turbopack)
+- TypeScript project
+- React 18+ with modern architecture
+- Package manager: npm (has package-lock.json)
+
+API LIBRARIES DETECTED:
+✅ @tanstack/react-query: ^5.85.0 (GOOD - modern caching library)
+✅ axios: ^1.11.0 (detected)
+⚠️  Raw fetch calls (detected in multiple files)
+⚠️  Custom API client (src/lib/api/client.ts)
+
+KEY OBSERVATIONS:
+1. React Query is already installed - this is good for optimization
+2. Multiple API patterns detected (axios, fetch, custom client)
+3. Custom API client with retry logic exists
+4. Health check polling system detected
+
+DEPENDENCY ANALYSIS:
+- Modern React ecosystem with good performance libs
+- TipTap for rich text editing (bundle size consideration)
+- Clerk for authentication (managed service)
+- Radix UI components (tree-shakeable)
+- Motion/animation libraries (bundle impact)
+
+INITIAL COST CONCERNS:
+1. Mixed API patterns could lead to duplicate requests
+2. Health check polling every 30 seconds
+3. Multiple fetch patterns without central deduplication
+4. No evidence of request batching
+
+NEXT STEPS:
+- Map all API call sites
+- Identify polling/frequent requests
+- Find duplicate data fetching patterns
+- Measure baseline network usage
