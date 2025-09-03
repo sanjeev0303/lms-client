@@ -3,6 +3,7 @@
 import { ClerkProvider } from '@clerk/nextjs'
 import { useTheme } from 'next-themes'
 import { UserSyncProvider } from './UserSyncProvider'
+import { clerkConfig } from '@/lib/config/clerk'
 
 interface AuthProviderProps {
   children: React.ReactNode
@@ -15,9 +16,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const clerkJSUrl = process.env.NEXT_PUBLIC_CLERK_JS_URL ||
     'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js'
 
+  // Don't render ClerkProvider during build if publishableKey is missing
+  if (!clerkConfig.publishableKey && typeof window === 'undefined') {
+    return <div>{children}</div>
+  }
+
   return (
     <ClerkProvider
-      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      publishableKey={clerkConfig.publishableKey}
       clerkJSUrl={clerkJSUrl}
       appearance={{
         variables: {

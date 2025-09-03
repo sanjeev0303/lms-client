@@ -6,12 +6,22 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { logger } from '@/lib/utils/logger';
 
+// Handle missing Clerk configuration during build
+if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.NODE_ENV === 'production') {
+  console.warn('Clerk publishable key is missing during build. This is expected during static generation.');
+}
+
 // Module-scope cache so it can persist between requests on the same runtime
 const roleCache = new Map<string, { role: string; timestamp: number }>();
 const ROLE_CACHE_TTL = 15 * 60 * 1000; // Increase to 15 minutes for better performance
 const ROLE_CACHE_FALLBACK_TTL = 60 * 60 * 1000; // 1 hour fallback for server issues
 
 export default clerkMiddleware(async (auth, request: NextRequest) => {
+    // Skip auth checks during build time
+    if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+        return NextResponse.next();
+    }
+
     const { userId, getToken } = await auth();
     const { pathname } = request.nextUrl;
 
