@@ -17,7 +17,7 @@
     "NEXT_PUBLIC_CLERK_SIGN_UP_URL": "/sign-up",
     "NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL": "/",
     "NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL": "/",
-    "NEXT_PUBLIC_API_URL": "https://lms-server-lw51.onrender.com",
+    "NEXT_PUBLIC_API_URL": "/api",
     "NEXT_PUBLIC_RAZORPAY_KEY_ID": "rzp_test_R6piEg43ylFzxw",
     "ANALYZE": "false",
     "NEXT_PUBLIC_ENABLE_PERFORMANCE_MONITORING": "true",
@@ -28,7 +28,34 @@
     "NEXT_PUBLIC_ENABLE_DEVTOOLS": "false",
     "NEXT_PUBLIC_ENABLE_OFFLINE_MODE": "false"
   },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://lms-server-lw51.onrender.com/:path*"
+    }
+  ],
   "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "X-Requested-With, Content-Type, Authorization"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
     {
       "source": "/(.*)",
       "headers": [
@@ -37,21 +64,6 @@
           "value": "public, max-age=31536000, immutable"
         }
       ]
-    },
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
-        }
-      ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://lms-server-lw51.onrender.com/:path*"
     }
   ]
 }

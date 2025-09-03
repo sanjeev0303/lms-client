@@ -69,7 +69,7 @@ export const PerformanceOptimizer: React.FC<PerformanceOptimizerProps> = ({ chil
       const target = event.target as HTMLElement;
       const link = target.closest('a');
 
-      if (link && link.href) {
+      if (link && link.href && typeof window !== 'undefined') {
         const url = new URL(link.href);
         const pathname = url.pathname;
 
@@ -124,11 +124,13 @@ export const PerformanceOptimizer: React.FC<PerformanceOptimizerProps> = ({ chil
     };
 
     // Add event listeners for link hovering
-    document.addEventListener('mouseover', handleLinkHover, { passive: true });
+    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+      document.addEventListener('mouseover', handleLinkHover, { passive: true });
 
-    return () => {
-      document.removeEventListener('mouseover', handleLinkHover);
-    };
+      return () => {
+        document.removeEventListener('mouseover', handleLinkHover);
+      };
+    }
   }, [router, queryClient]);
 
   // Performance monitoring
