@@ -181,3 +181,31 @@ export const useDeleteLecture = (courseId: string) => {
     },
   });
 };
+
+/**
+ * Hook to reorder lectures
+ */
+export const useReorderLectures = (courseId: string) => {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (lectureOrders: { id: string; position: number }[]) => {
+      const token = await getToken();
+      const response = await lectureService.reorderLectures(courseId, lectureOrders, token || undefined);
+      return response.data;
+    },
+    onSuccess: () => {
+      // Invalidate course lectures to reflect new order
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.COURSE_LECTURES(courseId),
+      });
+
+      toast.success('Lectures reordered successfully!');
+    },
+    onError: (error) => {
+      console.error('Failed to reorder lectures:', error);
+      toast.error('Failed to reorder lectures. Please try again.');
+    },
+  });
+};

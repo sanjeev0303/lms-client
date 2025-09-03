@@ -11,7 +11,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS, API_ENDPOINTS, REQUEST_TIMEOUT } from '@/lib/constants/api';
 import { courseService } from '@/lib/api/services';
 import { apiClient } from '@/lib/api/client';
-import { warmUpCache, preloadCriticalData, getPreloadedData } from '@/lib/utils/preloader';
+import { warmUpCache, getPreloadedData } from '@/lib/utils/preloader';
 
 interface PerformanceOptimizerProps {
   children: React.ReactNode;
@@ -32,8 +32,8 @@ export const PerformanceOptimizer: React.FC<PerformanceOptimizerProps> = ({ chil
         // Try hydrate from preloader cache first to avoid extra network
         const preloaded = getPreloadedData('published-courses');
         if (preloaded && !queryClient.getQueryData(QUERY_KEYS.PUBLISHED_COURSES)) {
-          const list = (preloaded && typeof preloaded === 'object' && 'data' in preloaded) 
-            ? preloaded.data 
+          const list = (preloaded && typeof preloaded === 'object' && 'data' in preloaded)
+            ? preloaded.data
             : preloaded;
           queryClient.setQueryData(QUERY_KEYS.PUBLISHED_COURSES, list);
         }
@@ -146,7 +146,7 @@ export const PerformanceOptimizer: React.FC<PerformanceOptimizerProps> = ({ chil
           // Log large resources
           if (entry.entryType === 'resource') {
             const resourceEntry = entry as PerformanceResourceTiming;
-            if (resourceEntry.transferSize && resourceEntry.transferSize > 500000) {
+            if (resourceEntry.transferSize && resourceEntry.transferSize > 2_000_000) {
               console.warn('Large resource detected:', entry.name, resourceEntry.transferSize + 'bytes');
             }
           }

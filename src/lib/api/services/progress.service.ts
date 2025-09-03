@@ -4,7 +4,7 @@
  */
 
 import { apiClient, createAuthenticatedApiClient } from '../client';
-import { API_ENDPOINTS } from '@/lib/constants/api';
+import { API_ENDPOINTS, API_PREFIX, LECTURE_PROGRESS_PREFIX } from '@/lib/constants/api';
 import type {
     LectureProgress,
     CourseProgress,
@@ -53,7 +53,7 @@ export class ProgressService {
     ): Promise<ApiResponse<LectureProgress>> {
         const client = token ? createAuthenticatedApiClient(token) : apiClient;
         return client.post<LectureProgress>(
-            `/api/lecture-progress/lecture/${lectureId}/course/${courseId}/complete`,
+            `${API_PREFIX}${LECTURE_PROGRESS_PREFIX}/lecture/${lectureId}/course/${courseId}/complete`,
             {}
         );
     }

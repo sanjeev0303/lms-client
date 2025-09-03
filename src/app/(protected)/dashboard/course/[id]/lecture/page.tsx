@@ -4,13 +4,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  useCourseLectures,
-  useCreateLecture,
-  useDeleteLecture,
+    useCourseLectures,
+    useCreateLecture,
+    useDeleteLecture,
+    useReorderLectures,
 } from "@/hooks/lecture/useLecture";
-import { Edit, Loader2, PlayCircle, Trash2 } from "lucide-react";
+import { SortableLectureList } from "@/components/lecture/sortable-lecture-list";
+import { Loader2, PlayCircle } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+
+interface Lecture {
+  id: string;
+  title: string;
+  description?: string;
+  videoUrl?: string;
+  isFree: boolean;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 const CourseLecturePage = () => {
   const router = useRouter();
@@ -27,11 +40,7 @@ const CourseLecturePage = () => {
     refetch,
   } = useCourseLectures(courseId);
   const { mutate: deleteLecture } = useDeleteLecture(courseId);
-
-  useEffect(() => {
-    // Any initialization logic can go here
-    console.log("Course lectures page loaded");
-  }, []);
+  const { mutate: reorderLectures, isPending: isReordering } = useReorderLectures(courseId);
 
   const handleCreateLecture = () => {
     if (!lectureTitle.trim()) {
@@ -69,6 +78,34 @@ const CourseLecturePage = () => {
       },
     });
   };
+
+  const handleLectureReorder = (reorderedLectures: Lecture[]) => {
+    // Create the reorder payload
+    const lectureOrders = reorderedLectures.map((lecture, index) => ({
+      id: lecture.id,
+      position: index + 1
+    }));
+
+    reorderLectures(lectureOrders);
+  };
+
+  const handleEditLecture = (lectureId: string) => {
+    router.push(`/dashboard/course/${courseId}/lecture/${lectureId}`);
+  };
+
+  // Sort lectures by position for display and map to expected structure
+  const sortedLectures = lecturesData
+    ? [...lecturesData].map((lecture: any) => ({
+        id: lecture.id,
+        title: lecture.title,
+        description: lecture.description,
+        videoUrl: lecture.videoUrl,
+        isFree: lecture.isFree,
+        position: lecture.order || lecture.position || 0, // Use order field, fallback to position
+        createdAt: lecture.createdAt,
+        updatedAt: lecture.updatedAt,
+      } as Lecture)).sort((a, b) => a.position - b.position)
+    : [];
 
   return (
     <div className="flex-1 mx-auto max-w-2xl px-6 py-8">
@@ -136,7 +173,7 @@ const CourseLecturePage = () => {
             Course Lectures
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
-            Manage and edit your course lectures
+            Manage and edit your course lectures. Drag lectures to reorder them.
           </p>
         </div>
 
@@ -149,98 +186,15 @@ const CourseLecturePage = () => {
               </span>
             </div>
           </div>
-        ) : lecturesData && lecturesData.length > 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="divide-y divide-gray-200 dark:divide-gray-700">
-              {lecturesData.map((lecture: any, index: number) => (
-                <div
-                  key={lecture.id}
-                  className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex-shrink-0">
-                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                          <PlayCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-3">
-                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                            #{index + 1}
-                          </span>
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
-                            {lecture.title}
-                          </h3>
-                        </div>
-                        <div className="flex items-center space-x-4 mt-2">
-                          <span className="text-sm text-gray-600 dark:text-gray-300">
-                            Created:{" "}
-                            {new Date(lecture.createdAt).toLocaleDateString()}
-                          </span>
-                          {lecture.videoUrl && (
-                            <span className="text-sm text-green-600 dark:text-green-400">
-                              Video uploaded
-                            </span>
-                          )}
-                          <span
-                            className={`text-sm px-2 py-1 rounded-full ${
-                              lecture.isFree
-                                ? "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300"
-                                : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
-                            }`}
-                          >
-                            {lecture.isFree ? "Free Preview" : "Premium"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          router.push(
-                            `/dashboard/course/${courseId}/lecture/${lecture.id}`
-                          )
-                        }
-                        className="text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900"
-                      >
-                        <Edit className="w-4 h-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleLectureDelete(lecture.id)}
-                        disabled={deletingId === lecture.id}
-                        className="text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900"
-                      >
-                        {deletingId === lecture.id ? (
-                          <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                        ) : (
-                          <Trash2 className="w-4 h-4 mr-1" />
-                        )}
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         ) : (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8">
-            <div className="text-center">
-              <PlayCircle className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                No lectures yet
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                Create your first lecture to get started with your course.
-              </p>
-            </div>
-          </div>
+          <SortableLectureList
+            lectures={sortedLectures}
+            onReorder={handleLectureReorder}
+            onEdit={handleEditLecture}
+            onDelete={handleLectureDelete}
+            deletingId={deletingId}
+            isReordering={isReordering}
+          />
         )}
       </div>
     </div>

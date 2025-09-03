@@ -33,6 +33,9 @@ const nextConfig: NextConfig = {
         optimizeCss: true,
     },
 
+    // External packages configuration
+    serverExternalPackages: ['sharp'],
+
     // Turbopack configuration (moved from experimental.turbo)
     turbopack: {
         rules: {
@@ -87,12 +90,24 @@ const nextConfig: NextConfig = {
                 hostname: "github.com",
                 pathname: "/**",
             },
+            // Add wildcard for testing (development only)
+            {
+                protocol: "https",
+                hostname: "*",
+                pathname: "/**",
+            },
         ],
         dangerouslyAllowSVG: true,
         contentDispositionType: 'attachment',
+        contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
         deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
         imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+        minimumCacheTTL: 300, // Cache images for 5 minutes minimum
+        unoptimized: false, // Keep optimization enabled
+        loader: 'default',
     },
+
+
 
     // Bundle analyzer and webpack optimizations
     ...(process.env.ANALYZE === 'true' && {

@@ -206,10 +206,10 @@ export class ApiClient {
                 }
 
                 if (!response.ok) {
-                    const errorMessage = (data && typeof data === 'object' && 'message' in data && typeof data.message === 'string') 
-                        ? data.message 
+                    const errorMessage = (data && typeof data === 'object' && 'message' in data && typeof data.message === 'string')
+                        ? data.message
                         : `HTTP error! status: ${response.status}`;
-                    
+
                     throw new ApiClientError(
                         errorMessage,
                         response.status,
@@ -257,10 +257,10 @@ export class ApiClient {
                         }
 
                         if (!fallbackResponse.ok) {
-                            const fallbackErrorMessage = (fallbackData && typeof fallbackData === 'object' && 'message' in fallbackData && typeof fallbackData.message === 'string') 
-                                ? fallbackData.message 
+                            const fallbackErrorMessage = (fallbackData && typeof fallbackData === 'object' && 'message' in fallbackData && typeof fallbackData.message === 'string')
+                                ? fallbackData.message
                                 : `HTTP error! status: ${fallbackResponse.status}`;
-                            
+
                             throw new ApiClientError(
                                 fallbackErrorMessage,
                                 fallbackResponse.status,

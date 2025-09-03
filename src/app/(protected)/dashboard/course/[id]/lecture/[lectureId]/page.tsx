@@ -22,7 +22,6 @@ import { toast } from "sonner";
 const LectureEditPage = () => {
   const router = useRouter();
   const params = useParams();
-  const { getToken } = useAuth();
   const courseId = params.id as string;
   const lectureId = params.lectureId as string;
 
@@ -53,7 +52,7 @@ const LectureEditPage = () => {
       setIsFree(lectureData.isFree || false);
     }
     refetch();
-  }, [lectureData, lectureId]);
+  }, [lectureData, lectureId, refetch]);
 
   const handleVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

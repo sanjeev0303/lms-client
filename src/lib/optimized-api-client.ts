@@ -8,7 +8,7 @@ import type { ApiResponse } from '@/types/api';
 import { logger } from '@/lib/utils/logger';
 
 // Request deduplication cache
-const inFlightRequests = new Map<string, Promise<any>>();
+const inFlightRequests = new Map<string, Promise<ApiResponse<any>>>();
 
 // Cross-tab token refresh coordination
 class TokenRefreshCoordinator {
@@ -76,14 +76,12 @@ class TokenRefreshCoordinator {
 export class OptimizedApiClient {
     private baseURL: string;
     private defaultHeaders: Record<string, string>;
-    private tokenRefreshCoordinator: TokenRefreshCoordinator;
 
     constructor(baseURL: string = API_BASE_URL) {
         this.baseURL = baseURL;
         this.defaultHeaders = {
             'Content-Type': 'application/json',
         };
-        this.tokenRefreshCoordinator = TokenRefreshCoordinator.getInstance();
     }
 
     /**
@@ -108,10 +106,8 @@ export class OptimizedApiClient {
         const existingRequest = inFlightRequests.get(cacheKey);
         if (existingRequest) {
             logger.debug('API_CLIENT', 'Deduplicating GET request', { endpoint, cacheKey });
-            return existingRequest;
+            return existingRequest as Promise<ApiResponse<T>>;
         }
-
-        // Create new request
         const requestPromise = this.executeRequest<T>('GET', endpoint, undefined, config);
 
         // Cache the promise
@@ -131,7 +127,7 @@ export class OptimizedApiClient {
      */
     async post<T>(
         endpoint: string,
-        data?: any,
+        data?: unknown,
         config: { headers?: Record<string, string>; timeout?: number } = {}
     ): Promise<ApiResponse<T>> {
         return this.executeRequest<T>('POST', endpoint, data, config);
@@ -142,7 +138,7 @@ export class OptimizedApiClient {
      */
     async put<T>(
         endpoint: string,
-        data?: any,
+        data?: unknown,
         config: { headers?: Record<string, string>; timeout?: number } = {}
     ): Promise<ApiResponse<T>> {
         return this.executeRequest<T>('PUT', endpoint, data, config);
@@ -164,7 +160,7 @@ export class OptimizedApiClient {
     private async executeRequest<T>(
         method: string,
         endpoint: string,
-        data?: any,
+        data?: unknown,
         config: { headers?: Record<string, string>; timeout?: number } = {}
     ): Promise<ApiResponse<T>> {
         const url = `${this.baseURL}${endpoint}`;
@@ -194,7 +190,7 @@ export class OptimizedApiClient {
             clearTimeout(timeoutId);
 
             // Handle response
-            let responseData: any;
+            let responseData: unknown;
             const contentType = response.headers.get('content-type');
 
             if (contentType?.includes('application/json')) {
@@ -206,7 +202,10 @@ export class OptimizedApiClient {
             }
 
             if (!response.ok) {
-                throw new Error(responseData?.message || `HTTP error! status: ${response.status}`);
+                const errorMessage = (responseData && typeof responseData === 'object' && 'message' in responseData && typeof responseData.message === 'string')
+                    ? responseData.message
+                    : `HTTP error! status: ${response.status}`;
+                throw new Error(errorMessage);
             }
 
             // Ensure consistent response format

@@ -11,7 +11,7 @@ import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
+import { FallbackImage } from "@/components/ui/fallback-image";
 
 const ProfilePage = () => {
   const router = useRouter();
@@ -154,31 +154,31 @@ const ProfilePage = () => {
                 <div className="flex items-center space-x-4">
                   <div className="relative">
                     {previewUrl ? (
-                      <Image
+                      <FallbackImage
                         src={previewUrl}
                         alt="Preview"
+                        fallbackSrc="/default-avatar.svg"
                         width={96}
                         height={96}
                         className="w-24 h-24 rounded-full object-cover border-4 border-gray-600"
-                        unoptimized
                       />
                     ) : serverUser?.photoUrl ? (
-                      <Image
+                      <FallbackImage
                         src={serverUser.photoUrl}
                         alt="Profile"
+                        fallbackSrc="/default-avatar.svg"
                         width={96}
                         height={96}
                         className="w-24 h-24 rounded-full object-cover border-4 border-gray-600"
-                        unoptimized
                       />
                     ) : serverUser?.imageUrl ? (
-                      <Image
+                      <FallbackImage
                         src={serverUser.imageUrl}
                         alt="Profile"
+                        fallbackSrc="/default-avatar.svg"
                         width={96}
                         height={96}
                         className="w-24 h-24 rounded-full object-cover border-4 border-gray-600"
-                        unoptimized
                       />
                     ) : (
                       <div className="w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center">

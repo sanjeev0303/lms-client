@@ -104,7 +104,7 @@ class FastApiClient {
   }
 
   // Optimized GET request
-  async get<T = any>(endpoint: string, config: Omit<FastRequestConfig, 'method' | 'body'> = {}): Promise<T> {
+  async get<T = unknown>(endpoint: string, config: Omit<FastRequestConfig, 'method' | 'body'> = {}): Promise<T> {
     return this.request<T>(endpoint, { ...config, method: 'GET' });
   }
 
@@ -119,7 +119,7 @@ class FastApiClient {
   }
 
   // Optimized DELETE request
-  async delete<T = any>(endpoint: string, config: Omit<FastRequestConfig, 'method' | 'body'> = {}): Promise<T> {
+  async delete<T = unknown>(endpoint: string, config: Omit<FastRequestConfig, 'method' | 'body'> = {}): Promise<T> {
     return this.request<T>(endpoint, { ...config, method: 'DELETE' });
   }
 

@@ -1,9 +1,8 @@
 import { Course } from "@/types/api";
-import Image from "next/image";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
-
+import { FallbackImage } from "../ui/fallback-image";
 
 interface CourseCardProps {
   course?: Course;
@@ -43,9 +42,10 @@ const CourseCard = ({ course, priority = false }: CourseCardProps) => {
       <div className="w-full max-w-sm mx-auto overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-200 dark:border-gray-700">
         {/* Course Image */}
         <div className="relative w-full h-48 overflow-hidden">
-          <Image
+          <FallbackImage
             src={displayCourse.thumbnail || defaultCourse.thumbnail}
             alt={displayCourse.title}
+            fallbackSrc="/default-course-thumbnail.svg"
             fill
             className="object-cover transition-transform duration-300 hover:scale-110"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

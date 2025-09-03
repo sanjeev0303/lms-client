@@ -2,30 +2,29 @@
 
 import { Button } from "@/components/ui/button";
 import { courseService } from "@/lib/api/services";
-import { useCourseAnalytics } from "@/hooks/course/useCourseAnalytics";
 import { useAuth } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import {
-    ArrowLeft,
-    Award,
-    BarChart3,
-    BookOpen,
-    Calendar,
-    Clock,
-    DollarSign,
-    Download,
-    Edit3,
-    Eye,
-    Menu,
-    PlayCircle,
-    Plus,
-    Settings,
-    Share2,
-    Star,
-    Target,
-    TrendingUp,
-    Users,
-    X,
+  ArrowLeft,
+  Award,
+  BarChart3,
+  BookOpen,
+  Calendar,
+  Clock,
+  DollarSign,
+  Download,
+  Edit3,
+  Eye,
+  Menu,
+  PlayCircle,
+  Plus,
+  Settings,
+  Share2,
+  Star,
+  Target,
+  TrendingUp,
+  Users,
+  X,
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -57,12 +56,6 @@ const DashboardCoursePage = () => {
     enabled: !!courseId,
   });
 
-  // Comment out analytics for now until we create the hook
-  // const {
-  //   data: analyticsData,
-  //   isLoading: isLoadingAnalytics,
-  //   error: analyticsError,
-  // } = useCourseAnalytics(courseId);
 
   const course = courseData;
 

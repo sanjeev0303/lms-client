@@ -61,7 +61,7 @@ export default function LecturePage() {
     }
   }, [courseId, lectureId, isSignedIn])
 
-  const currentProgress = progress?.lectures.find(p => p.lectureId === lectureId)
+  const currentProgress = progress?.lectures?.find(p => p.lectureId === lectureId)
   const canAccess = lecture?.isFree || currentProgress?.isCompleted || (lecture?.isFree ?? false)
 
   const handleCompleteLesson = async () => {
@@ -74,7 +74,7 @@ export default function LecturePage() {
 
       // Update local progress state
       setProgress(prev => {
-        if (!prev) return prev
+        if (!prev || !prev.lectures) return prev
         return {
           ...prev,
           lectures: prev.lectures.map(p =>

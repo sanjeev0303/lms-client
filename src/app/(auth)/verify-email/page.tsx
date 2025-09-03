@@ -1,15 +1,14 @@
 "use client";
 
-import { useAuth, useSession, useSignUp } from "@clerk/nextjs";
+import { refreshUserData } from "@/components/auth/custom-user-button";
+import { useAuth, useSignUp } from "@clerk/nextjs";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense } from "react";
-import Link from "next/link";
-import { refreshUserData } from "@/components/auth/custom-user-button";
 
 function VerifyEmailContent() {
   const { isLoaded, signUp, setActive } = useSignUp();
   const { isSignedIn } = useAuth();
-  const { session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -28,14 +27,14 @@ function VerifyEmailContent() {
     if (isSignedIn) {
       router.push("/dashboard");
     }
-  }, [isSignedIn]);
+  }, [isSignedIn, router]);
 
   React.useEffect(() => {
     // If no email or no signUp in progress, redirect to sign-up
     if (isLoaded && (!email || !signUp)) {
       router.push("/sign-up");
     }
-  }, [isLoaded, email, signUp]);
+  }, [isLoaded, email, signUp, router]);
 
   const handleVerification = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +60,7 @@ function VerifyEmailContent() {
           if (clerkUserId && password && firstName && lastName) {
             // Call our custom signup endpoint to store user with hashed password
             const signupResponse = await fetch(
-              "http://localhost:5000/api/auth/signup",
+             `${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`,
               {
                 method: "POST",
                 headers: {

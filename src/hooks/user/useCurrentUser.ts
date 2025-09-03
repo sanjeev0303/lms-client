@@ -70,8 +70,8 @@ export const useUpdateProfile = () => {
 
       // Optimistically update cache
       if (previousData) {
-        queryClient.setQueryData(QUERY_KEYS.CURRENT_USER, (old: any) => ({
-          ...old,
+        queryClient.setQueryData(QUERY_KEYS.CURRENT_USER, (old: unknown) => ({
+          ...(old as ExtendedUser),
           ...newData,
         }));
       }

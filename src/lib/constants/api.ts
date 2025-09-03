@@ -54,15 +54,16 @@ export const API_ENDPOINTS = {
     LECTURE_BY_ID: (lectureId: string) => `${LECTURE_PREFIX}/${lectureId}`,
     LECTURE_UPDATE: (lectureId: string) => `${LECTURE_PREFIX}/${lectureId}`,
     LECTURE_DELETE: (lectureId: string) => `${LECTURE_PREFIX}/${lectureId}`,
+    LECTURE_REORDER: (courseId: string) => `${LECTURE_PREFIX}/reorder/${courseId}`,
 
     // Payment & Orders
     ORDER_CREATE: `${ORDER_PREFIX}/create-order`,
     ORDER_VERIFY: `${ORDER_PREFIX}/verify-payment`,
 
     // Progress Tracking
-    PROGRESS_BY_COURSE: (courseId: string) => `${LECTURE_PROGRESS_PREFIX}/course/${courseId}`,
-    PROGRESS_BY_LECTURE: (lectureId: string) => `${LECTURE_PROGRESS_PREFIX}/lecture/${lectureId}`,
-    PROGRESS_UPDATE: (lectureId: string) => `${LECTURE_PROGRESS_PREFIX}/lecture/${lectureId}`,
+    PROGRESS_BY_COURSE: (courseId: string) => `${API_PREFIX}${LECTURE_PROGRESS_PREFIX}/course/${courseId}`,
+    PROGRESS_BY_LECTURE: (lectureId: string) => `${API_PREFIX}${LECTURE_PROGRESS_PREFIX}/lecture/${lectureId}`,
+    PROGRESS_UPDATE: (lectureId: string) => `${API_PREFIX}${LECTURE_PROGRESS_PREFIX}/lecture/${lectureId}`,
 } as const;
 
 // Request timeout configurations (now reads from environment)

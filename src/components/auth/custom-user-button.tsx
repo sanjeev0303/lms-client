@@ -1,10 +1,10 @@
 'use client';
 
 import { useClerk, useUser } from '@clerk/nextjs';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useUnifiedUser } from './UserSyncProvider';
+import { FallbackImage } from '../ui/fallback-image';
 
 interface ServerUser {
   id: string;
@@ -90,13 +90,13 @@ export default function CustomUserButton() {
       >
         <div className="relative w-8 h-8">
           {profileImageUrl ? (
-            <Image
+            <FallbackImage
               src={profileImageUrl}
               alt={displayName}
+              fallbackSrc="/default-avatar.svg"
               width={32}
               height={32}
               className="rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
-              key={profileImageUrl} // Force re-render when image changes
             />
           ) : (
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
@@ -132,13 +132,13 @@ export default function CustomUserButton() {
             <div className="flex items-center space-x-3">
               <div className="relative w-10 h-10">
                 {profileImageUrl ? (
-                  <Image
+                  <FallbackImage
                     src={profileImageUrl}
                     alt={displayName}
+                    fallbackSrc="/default-avatar.svg"
                     width={40}
                     height={40}
                     className="rounded-full object-cover"
-                    key={profileImageUrl} // Force re-render when image changes
                   />
                 ) : (
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">

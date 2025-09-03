@@ -67,6 +67,21 @@ export class LectureService {
         const client = token ? createAuthenticatedApiClient(token) : apiClient;
         return client.delete<void>(API_ENDPOINTS.LECTURE_DELETE(lectureId));
     }
+
+    /**
+     * Reorder lectures for a course
+     */
+    static async reorderLectures(
+        courseId: string,
+        lectureOrders: { id: string; position: number }[],
+        token?: string
+    ): Promise<ApiResponse<{ message: string }>> {
+        const client = token ? createAuthenticatedApiClient(token) : apiClient;
+        return client.post<{ message: string }>(
+            API_ENDPOINTS.LECTURE_REORDER(courseId),
+            { lectureOrders }
+        );
+    }
 }
 
 export const lectureService = LectureService;
