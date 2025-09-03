@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Allow crawling of public pages
+Allow: /sign-in
+Allow: /sign-up
+Allow: /courses
+Allow: /about
+
+# Disallow private/admin areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /profile/
+
+# Sitemap location
+Sitemap: https://your-domain.vercel.app/sitemap.xml

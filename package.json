@@ -6,13 +6,17 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "build:production": "npm run clean && npm run type-check && npm run lint && npm run build",
+    "build:analyze": "ANALYZE=true npm run build",
     "start": "next start",
+    "start:production": "next start -p 3000",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
     "analyze": "ANALYZE=true npm run build",
     "clean": "rm -rf .next",
-    "build:production": "npm run clean && npm run type-check && npm run lint && npm run build"
+    "export": "next export",
+    "preview": "npm run build && npm run start"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.31.8",
