@@ -40,6 +40,17 @@ class NetworkMonitor {
   }
 
   static getInstance(): NetworkMonitor {
+    if (typeof window === 'undefined') {
+      // Return a basic instance for SSR
+      return {
+        getStatus: () => ({ isOnline: true, isSlowConnection: false, lastChecked: new Date() }),
+        addListener: () => {},
+        removeListener: () => {},
+        checkConnection: async () => ({ isOnline: true, isSlowConnection: false, lastChecked: new Date() }),
+        retryWithBackoff: async (fn: () => Promise<any>) => fn(),
+      } as any;
+    }
+
     if (!NetworkMonitor.instance) {
       NetworkMonitor.instance = new NetworkMonitor();
     }
@@ -179,15 +190,38 @@ class NetworkMonitor {
   }
 }
 
-// Export singleton instance
-export const networkMonitor = NetworkMonitor.getInstance();
+// Export singleton instance with lazy initialization
+let networkMonitorInstance: NetworkMonitor | null = null;
+
+export const networkMonitor = (() => {
+  if (typeof window === 'undefined') {
+    // Return a basic instance for SSR
+    return {
+      getStatus: () => ({ isOnline: true, isSlowConnection: false, lastChecked: new Date() }),
+      subscribe: () => () => {},
+      checkConnection: async () => ({ isOnline: true, isSlowConnection: false, lastChecked: new Date() }),
+      retryWithBackoff: async (fn: () => Promise<any>) => fn(),
+    } as any;
+  }
+
+  if (!networkMonitorInstance) {
+    networkMonitorInstance = NetworkMonitor.getInstance();
+  }
+  return networkMonitorInstance;
+})();
 
 // Hook for React components
 export function useNetworkStatus() {
-  const [status, setStatus] = React.useState<NetworkStatus>(networkMonitor.getStatus());
+  const [status, setStatus] = React.useState<NetworkStatus>(
+    typeof window !== 'undefined'
+      ? networkMonitor.getStatus()
+      : { isOnline: true, isSlowConnection: false, lastChecked: new Date() }
+  );
 
   React.useEffect(() => {
-    return networkMonitor.subscribe(setStatus);
+    if (typeof window !== 'undefined') {
+      return networkMonitor.subscribe(setStatus);
+    }
   }, []);
 
   return status;

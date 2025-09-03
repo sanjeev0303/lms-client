@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/global/navbar";
 import { ToastProvider } from "@/providers/toast-provider";
-import PerformanceOptimizer from "@/components/global/performance-optimizer";
+import PerformanceOptimizerWrapper from "@/components/global/performance-optimizer-wrapper";
 import ServerStatus from "@/components/global/server-status";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 
@@ -75,13 +75,13 @@ export default function RootLayout({
         >
           <QueryProvider>
             <AuthProvider>
-              <PerformanceOptimizer>
+              <PerformanceOptimizerWrapper>
                 <div className="relative flex min-h-screen flex-col">
                   <Navbar />
                   <ServerStatus className="mx-4 mt-2" />
                   <div className="flex-1">{children}</div>
                 </div>
-              </PerformanceOptimizer>
+              </PerformanceOptimizerWrapper>
             </AuthProvider>
           </QueryProvider>
           <ToastProvider />

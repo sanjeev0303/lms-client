@@ -1,3 +1,6 @@
+// SSR polyfill to prevent "self is not defined" errors
+import './lib/utils/ssr-polyfill';
+
 import { clerkMiddleware } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';

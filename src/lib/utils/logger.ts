@@ -69,4 +69,5 @@ class Logger {
   }
 }
 
+// Export singleton instance (logger is safe for SSR)
 export const logger = new Logger();

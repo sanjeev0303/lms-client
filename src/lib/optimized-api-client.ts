@@ -44,15 +44,17 @@ class TokenRefreshCoordinator {
         }
 
         // Check if another tab is refreshing (simple localStorage check)
-        const refreshLock = localStorage.getItem('token-refresh-lock');
-        if (refreshLock && Date.now() - parseInt(refreshLock) < 30000) {
-            // Another tab is refreshing, wait briefly and return
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            return null;
-        }
+        if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+            const refreshLock = localStorage.getItem('token-refresh-lock');
+            if (refreshLock && Date.now() - parseInt(refreshLock) < 30000) {
+                // Another tab is refreshing, wait briefly and return
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return null;
+            }
 
-        // Acquire refresh lock
-        localStorage.setItem('token-refresh-lock', Date.now().toString());
+            // Acquire refresh lock
+            localStorage.setItem('token-refresh-lock', Date.now().toString());
+        }
 
         try {
             this.refreshPromise = refreshFunction();
@@ -66,7 +68,9 @@ class TokenRefreshCoordinator {
             return newToken;
         } finally {
             // Release lock
-            localStorage.removeItem('token-refresh-lock');
+            if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+                localStorage.removeItem('token-refresh-lock');
+            }
             this.refreshPromise = null;
         }
     }
@@ -251,8 +255,20 @@ export class OptimizedApiClient {
     }
 }
 
-// Export singleton instance
-export const optimizedApiClient = new OptimizedApiClient();
+// Export singleton instance with lazy initialization
+let optimizedApiClientInstance: OptimizedApiClient | null = null;
+
+export const optimizedApiClient = (() => {
+    if (typeof window === 'undefined') {
+        // Return a basic client for SSR
+        return new OptimizedApiClient();
+    }
+
+    if (!optimizedApiClientInstance) {
+        optimizedApiClientInstance = new OptimizedApiClient();
+    }
+    return optimizedApiClientInstance;
+})();
 
 // Export utility function for creating authenticated clients
 export function createOptimizedAuthenticatedClient(token: string): OptimizedApiClient {

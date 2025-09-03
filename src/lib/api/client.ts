@@ -371,8 +371,20 @@ export class ApiClient {
     }
 }
 
-// Create and export singleton instance
-export const apiClient = new ApiClient();
+// Create and export singleton instance with lazy initialization
+let apiClientInstance: ApiClient | null = null;
+
+export const apiClient = (() => {
+    if (typeof window === 'undefined') {
+        // Return a basic client for SSR
+        return new ApiClient();
+    }
+
+    if (!apiClientInstance) {
+        apiClientInstance = new ApiClient();
+    }
+    return apiClientInstance;
+})();
 
 // Export utility function for creating authenticated API client
 export function createAuthenticatedApiClient(token: string): ApiClient {

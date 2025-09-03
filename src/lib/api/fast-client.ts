@@ -145,6 +145,19 @@ class FastApiClient {
   }
 }
 
-// Export singleton instance
-export const fastApiClient = new FastApiClient();
+// Export singleton instance with lazy initialization
+let fastApiClientInstance: FastApiClient | null = null;
+
+export const fastApiClient = (() => {
+    if (typeof window === 'undefined') {
+        // Return a basic client for SSR
+        return new FastApiClient();
+    }
+
+    if (!fastApiClientInstance) {
+        fastApiClientInstance = new FastApiClient();
+    }
+    return fastApiClientInstance;
+})();
+
 export default FastApiClient;
